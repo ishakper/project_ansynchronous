@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:async/async.dart';
 import 'package:project_ansyngcronus/geolocation.dart';
+import 'package:project_ansyngcronus/navigation_dialog.dart';
 import 'package:project_ansyngcronus/navigation_first.dart';
 
 void main() {
@@ -21,7 +22,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-     home: const NavigationFirst(),
+      //home: const FuturePage(),
+      //home: LocationScreen(),
+      //home: const NavigationFirst(),
+      home: const NavigationDialogScreen(),
     );
   }
 }
