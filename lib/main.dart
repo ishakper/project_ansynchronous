@@ -1,9 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
-import 'dart:async';
-import 'package:async/async.dart';
-
+import 'package:project_ansyngcronus/geolocation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +10,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const FuturePage(),
+      home: const LocationScreen(),
     );
   }
 }
@@ -34,71 +32,35 @@ class FuturePage extends StatefulWidget {
 }
 
 class _FuturePageState extends State<FuturePage> {
-  Future handleError() async {
-    try {
-      await returnError();
-    }
-    catch (error) {
-      setState(() {
-        result = error.toString();
-      });
-    }
-    finally {
-      print('Complete');
-    }
-  }
-
-
-  Future returnError() async {
-    await Future.delayed(const Duration(seconds: 2));
-    throw Exception('Something terrible happened');
-  }
-
   void returnFG() {
-    // final futures = Future.wait<int>([
-    //   returnOneAsync(),
-    //   returnTwoAsync(),
-    //   returnThreeAsync(),
-    // ]);
+    final futures = Future.wait<int>([
+      returnOneAsync(),
+      returnTwoAsync(),
+      returnThreeAsync(),
+    ]);
 
-    FutureGroup<int> futureGroup = FutureGroup<int>();
-    futureGroup.add(returnOneAsync());
-    futureGroup.add(returnTwoAsync());
-    futureGroup.add(returnThreeAsync());
-    futureGroup.close();
-    futureGroup.future.then((List <int> value) {
-      int total = 0;
-      for (var element in value) {
-        total += element;
-      }
-      setState(() {
-        result = total.toString();
-      });
-    });
+    // FutureGroup<int> futureGroup = FutureGroup<int>();
+    // futureGroup.add(returnOneAsync());
+    // futureGroup.add(returnTwoAsync());
+    // futureGroup.add(returnThreeAsync());
+    // futureGroup.close();
+    // futureGroup.future.then((List <int> value) {
+    //   int total = 0;
+    //   for (var element in value) {
+    //     total += element;
+    //   }
+    //   setState(() {
+    //     result = total.toString();
+    //   });
+    // });
   }
 
-
-
-
-  late Completer completer;
-
-  Future getNumber() {
-    completer = Completer<int>();
-    calculate();
-    return completer.future;
+  Future<Response> getData() async {
+    const authority = 'www.googleapis.com';
+    const path = '/books/v1/volumes/e-ZDDwAAQBAJ';
+    Uri url = Uri.https(authority, path);
+    return http.get(url);
   }
-
-  Future calculate() async {
-    try {
-      await Future.delayed(const Duration(seconds : 5));
-      completer.complete(42);
-    }
-    catch (_) {
-      completer.completeError({});
-    }
-  }
-
-
 
   Future<int> returnOneAsync() async {
     await Future.delayed(const Duration(seconds: 3));
@@ -125,74 +87,73 @@ class _FuturePageState extends State<FuturePage> {
     });
   }
 
-  Future<Response> getData() async {
-    const authority = 'www.googleapis.com';
-    const path = '/books/v1/volumes/MWW8DwAAQBAJ';
-    Uri url = Uri.https(authority, path);
-    return http.get(url);
+  late Completer completer;
+
+  Future getNumber() {
+    completer = Completer<int>();
+    calculate();
+    return completer.future;
   }
 
-  String result = '';
+  Future calculate() async {
+    try {
+      await Future.delayed(const Duration(seconds: 5));
+      completer.complete(42);
+    } catch (_) {
+      completer.completeError({});
+    }
+  }
+//praktikum 5
+  Future returnError() async {
+    await Future.delayed(const Duration(seconds: 2));
+    throw Exception('Something terrible happened!');
+  }
 
+  Future handleError() async {
+    try {
+      await returnError();
+    } catch (error) {
+      setState(() {
+        result = error.toString();
+      });
+    } finally {
+      print('Complete');
+    }
+  }
+
+  //praktikum 5
+
+  String result = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Back from the Future'),
+        title: const Text('Back from the future'),
       ),
       body: Center(
-        child: Column(
-          children: [
-            ElevatedButton(
-              child: const Text('GO!'),
-              onPressed: () {
-                returnError()
-                .then((value) {
-                  setState(() {
-                    result = 'Success';
-                  });
-                }).catchError((onError) {
-                  setState(() {
-                    result = onError.toString();
-                  });
-                }).whenComplete(() => print('Complete'));
-
-
-                
-                // Praktikum 4
-                // returnFG();
-
-
-
-                // Praktikum 3
-                // getNumber().then((value) {
-                //   setState(() {
-                //     result = value.toString();
-                //   });
-                // }).catchError((e) {
-                //   result = 'An error occured';
-                // });
-
-                // Praktikum 2
-                // count();
-                // Praktikum 1
-                // setState(() {});
-                // getData()
-                // .then((value) {
-                //   result = value.body.toString().substring(0, 450);
-                //   setState(() {});
-                // }).catchError((_) {
-                //   result = 'An error occured';
-                //   setState(() {});
-                // });
-                }),
-              const Spacer(),
-              Text(result),
-              const Spacer(),
-              const CircularProgressIndicator(),
-              const Spacer(),
-          ],
-        ),
+        child: Column(children: [
+          const Spacer(),
+          ElevatedButton(
+            child: const Text('GO!'),
+            onPressed: () {
+              returnFG();
+              returnError().then((value) {
+                setState(() {
+                  result = 'Success';
+                });
+              }).catchError((onError) {
+                setState(() {
+                  result = onError.toString();
+                });
+              }).whenComplete(() => print('Complete'));
+            },
+          ),
+          const Spacer(),
+          Text(result),
+          const Spacer(),
+          const CircularProgressIndicator(),
+          const Spacer(),
+        ]),
       ),
     );
   }
