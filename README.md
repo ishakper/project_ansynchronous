@@ -1,7 +1,5 @@
----
-
 # **Praktikum Mobile Developmen**
-# **ASYNCRHONOUS**
+ **ASYNCRHONOUS**
 
 **Nama**: Ishak Hadi Pernama  
 **NIM**: 362358302072  
