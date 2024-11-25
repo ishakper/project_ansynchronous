@@ -2,24 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import 'package:async/async.dart';
 
 void main() {
   runApp(const MyApp());
-}
-
-Future<int> returnOneAsync() async {
-  await Future.delayed(const Duration(seconds: 3));
-  return 1;
-}
-
-Future<int> returnTwoAsync() async {
-  await Future.delayed(const Duration(seconds: 3));
-  return 2;
-}
-
-Future<int> returnThreeAsync() async {
-  await Future.delayed(const Duration(seconds: 3));
-  return 3;
 }
 
 class MyApp extends StatelessWidget {
@@ -46,59 +32,87 @@ class FuturePage extends StatefulWidget {
 }
 
 class _FuturePageState extends State<FuturePage> {
-  String result = '';
-  bool isLoading = false;
-
-  Future<void> count() async {
-    setState(() {
-      isLoading = true; // Menampilkan loading spinner
-    });
-
-    int total = 0;
-    try {
-      total = await returnOneAsync();
-      total += await returnTwoAsync();
-      total += await returnThreeAsync();
-      setState(() {
-        result = 'Total: $total';
-      });
-    } catch (e) {
-      setState(() {
-        result = 'An error occurred: $e';
-      });
-    } finally {
-      setState(() {
-        isLoading = false; // Sembunyikan loading spinner
-      });
-    }
+  Future<Response> getData() async {
+    const authority = 'www.googleapis.com';
+    const path = '/books/v1/volumes/e-ZDDwAAQBAJ';
+    Uri url = Uri.https(authority, path);
+    return http.get(url);
   }
 
+  Future<int> returnOneAsync() async {
+    await Future.delayed(const Duration(seconds: 3));
+    return 1;
+  }
+
+  Future<int> returnTwoAsync() async {
+    await Future.delayed(const Duration(seconds: 3));
+    return 2;
+  }
+
+  Future<int> returnThreeAsync() async {
+    await Future.delayed(const Duration(seconds: 3));
+    return 3;
+  }
+
+  Future count() async {
+    int total = 0;
+    total = await returnOneAsync();
+    total += await returnTwoAsync();
+    total += await returnThreeAsync();
+    setState(() {
+      result = total.toString();
+    });
+  }
+
+  late Completer completer;
+
+  Future getNumber() {
+    completer = Completer<int>();
+    calculate();
+    return completer.future;
+  }
+
+  Future calculate() async {
+    try { 
+      await Future.delayed(const Duration(seconds: 5));
+    completer.complete(42);
+  }
+  catch (_) {
+    completer.completeError({});
+  } }
+
+  String result = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Back from the Future'),
+        title: const Text('Back from the future'),
       ),
       body: Center(
-        child: Column(
-          children: [
-            const Spacer(),
-            ElevatedButton(
-              child: const Text('GO!'),
-              onPressed: () {
-                count(); // Memanggil fungsi count
-              },
-            ),
-            const Spacer(),
-            Text(
-              result,
-              textAlign: TextAlign.center,
-            ),
-            const Spacer(),
-            if (isLoading) const CircularProgressIndicator(), // Menampilkan loading saat proses berlangsung
-            const Spacer(),
-          ],
-        ),
+        child: Column(children: [
+          const Spacer(),
+          ElevatedButton(
+            child: const Text('GO!'),
+            onPressed: () {
+              count();
+              setState(() {});
+              getNumber().then((value) {
+                  setState(() { 
+                    result = value.toString();
+                    });
+                 
+              }).catchError((e) {
+                result = 'An error occurred';
+                setState(() {});
+              });
+            },
+          ),
+          const Spacer(),
+          Text(result),
+          const Spacer(),
+          const CircularProgressIndicator(),
+          const Spacer(),
+        ]),
       ),
     );
   }
