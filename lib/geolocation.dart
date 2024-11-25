@@ -9,45 +9,46 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  String myPosition = '';
+  Future<Position>? position;
 
   @override
   void initState() {
     super.initState();
-    getPosition().then((Position myPos) {
-      setState(() {
-        myPosition =
-        'Latitude: ${myPos.latitude.toString()} - Longitude: ${myPos.longitude.toString()}';
-      });
-    }).catchError((error) {
-      setState(() {
-        myPosition = 'Error: ${error.toString()}';
-      });
-    });
+    position = getPosition();
   }
 
   @override
   Widget build(BuildContext context) {
-    final myWidget = myPosition == ''
-        ? const CircularProgressIndicator()
-        : Text(
-      myPosition,
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 18),
-    );
-
     return Scaffold(
       appBar: AppBar(title: const Text('Current Location')),
-      body: Center(child: myWidget),
+      body: Center(
+        child: FutureBuilder<Position>(
+          future: position,
+          builder: (BuildContext context, AsyncSnapshot<Position> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return const Text('No location avaliable.');
+              }
+              final pos = snapshot.data!;
+              return Text('Latitude: ${pos.latitude}, Longitude: ${pos.longitude}');
+            } else {
+              return const Text('Unable to retrieve location.');
+            }
+          },
+        ),
+      ),
     );
   }
 
   Future<Position> getPosition() async {
     await Geolocator.requestPermission();
+    await Future.delayed(const Duration(seconds: 3)); // Simulate delay
     if (!await Geolocator.isLocationServiceEnabled()) {
       throw Exception('Location services are disabled.');
     }
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return position;
   }
 }
