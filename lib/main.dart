@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Moch. Dzaky Musyaddad',
+      title: 'Ishak Hadi Pernama',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -34,27 +34,47 @@ class FuturePage extends StatefulWidget {
 }
 
 class _FuturePageState extends State<FuturePage> {
-  void returnFG() {
-    final futures = Future.wait<int>([
-      returnOneAsync(),
-      returnTwoAsync(),
-      returnThreeAsync(),
-    ]);
+  Future handleError() async {
+    try {
+      await returnError();
+    }
+    catch (error) {
+      setState(() {
+        result = error.toString();
+      });
+    }
+    finally {
+      print('Complete');
+    }
+  }
 
-    // FutureGroup<int> futureGroup = FutureGroup<int>();
-    // futureGroup.add(returnOneAsync());
-    // futureGroup.add(returnTwoAsync());
-    // futureGroup.add(returnThreeAsync());
-    // futureGroup.close();
-    // futureGroup.future.then((List <int> value) {
-    //   int total = 0;
-    //   for (var element in value) {
-    //     total += element;
-    //   }
-    //   setState(() {
-    //     result = total.toString();
-    //   });
-    // });
+
+  Future returnError() async {
+    await Future.delayed(const Duration(seconds: 2));
+    throw Exception('Something terrible happened');
+  }
+
+  void returnFG() {
+    // final futures = Future.wait<int>([
+    //   returnOneAsync(),
+    //   returnTwoAsync(),
+    //   returnThreeAsync(),
+    // ]);
+
+    FutureGroup<int> futureGroup = FutureGroup<int>();
+    futureGroup.add(returnOneAsync());
+    futureGroup.add(returnTwoAsync());
+    futureGroup.add(returnThreeAsync());
+    futureGroup.close();
+    futureGroup.future.then((List <int> value) {
+      int total = 0;
+      for (var element in value) {
+        total += element;
+      }
+      setState(() {
+        result = total.toString();
+      });
+    });
   }
 
 
@@ -126,7 +146,24 @@ class _FuturePageState extends State<FuturePage> {
             ElevatedButton(
               child: const Text('GO!'),
               onPressed: () {
-                returnFG();
+                returnError()
+                .then((value) {
+                  setState(() {
+                    result = 'Success';
+                  });
+                }).catchError((onError) {
+                  setState(() {
+                    result = onError.toString();
+                  });
+                }).whenComplete(() => print('Complete'));
+
+
+                
+                // Praktikum 4
+                // returnFG();
+
+
+
                 // Praktikum 3
                 // getNumber().then((value) {
                 //   setState(() {
@@ -138,8 +175,6 @@ class _FuturePageState extends State<FuturePage> {
 
                 // Praktikum 2
                 // count();
-
-
                 // Praktikum 1
                 // setState(() {});
                 // getData()
