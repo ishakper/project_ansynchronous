@@ -120,4 +120,3 @@ Dapat memperoleh koordinat GPS saat dijalankan di browser menggunakan `Future` d
 
 ---
 
-Semoga README ini lebih rapi dan informatif! 😊
